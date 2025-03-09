@@ -33,14 +33,17 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
 
     public static void main(final String[] args) {
         checkClassPath();
-        if (args.length == 1) {
-            final GoldTrustCostBasis app = new GoldTrustCostBasis();
-            app.taxDataFile = new File(args[0]);
-            app.run();
-        } else {
+        if (args.length != 1) {
             showUsage();
+            System.exit(1);
         }
-        System.exit(0);
+        final GoldTrustCostBasis app = new GoldTrustCostBasis();
+        app.taxDataFile = new File(args[0]);
+        if (!app.taxDataFile.canRead()) {
+            System.err.println("Cannot read " + app.taxDataFile.getAbsolutePath());
+            System.exit(2);
+        }
+        app.run();
     }
 
     @Override

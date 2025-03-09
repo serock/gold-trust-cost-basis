@@ -80,10 +80,6 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
         if (this.taxDataFile.getName().endsWith(".pdf")) {
             final PDFHelper pdfHelper = new PDFHelper();
             lines = pdfHelper.getTextLines(this.taxDataFile);
-            final String titlePrefix = "SPDR Gold";
-            if (!pdfHelper.documentTitle().startsWith(titlePrefix)) {
-                throw new IOException("Title of PDF does not start with \"" + titlePrefix + "\" ... quitting.");
-            }
         } else {
             lines = Files.lines(this.taxDataFile.toPath());
         }
@@ -91,6 +87,6 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
     }
 
     private static void showUsage() {
-        System.out.println("Usage: java -jar gold-trust-cost-basis.jar <gold-tax-data.pdf>");
+        System.out.println("Usage: java -jar gold-trust-cost-basis.jar <gold-tax-data-pdf-or-txt-file>");
     }
 }

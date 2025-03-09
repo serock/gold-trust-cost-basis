@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 class SearchState implements State {
 
-    private static final Pattern patternGrossProceedsFile = Pattern.compile("^SPDR® GOLD TRUST (\\d{4}) GROSS PROCEEDS FILE$");
+    private static final Pattern patternGrossProceedsFile = Pattern.compile("^SPDR®?\\s+GOLD TRUST (\\d{4}) GROSS PROCEEDS FILE$");
 
     @Override
     public void accept(final Context context, final String text) {

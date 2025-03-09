@@ -40,16 +40,21 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
         final GoldTrustCostBasis app = new GoldTrustCostBasis();
         app.taxDataFile = new File(args[0]);
         if (!app.taxDataFile.canRead()) {
-            System.err.println("Cannot read " + app.taxDataFile.getAbsolutePath());
+            System.err.println("Error: Cannot read " + app.taxDataFile.getAbsolutePath());
             System.exit(2);
         }
         app.run();
+        System.exit(0);
     }
 
     @Override
     public void run() {
         try (Stream<String> lines = getLines()) {
             lines.forEachOrdered(this);
+            if (context().getGrossProceedsFormulas().length < 1) {
+                System.err.println("Error: No gross proceeds data read from file");
+                System.exit(2);
+            }
             final SpreadsheetDocumentHelper docHelper = new SpreadsheetDocumentHelper();
             final XSpreadsheetDocument document = docHelper.createDocument();
             buildGrossProceedsSheet(document);
@@ -70,7 +75,7 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
             Class.forName("com.sun.star.comp.helper.Bootstrap");
         } catch (final ClassNotFoundException e) {
             e.printStackTrace();
-            System.exit(0);
+            System.exit(1);
         }
     }
 

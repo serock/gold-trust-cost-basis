@@ -1,0 +1,8 @@
+load_freq_dawg 0
+load_number_dawg 0
+load_punc_dawg 0
+load_system_dawg 0
+page_separator
+tessedit_create_txt 1
+user_patterns_suffix user-patterns-gld
+user_words_suffix user-words-gld

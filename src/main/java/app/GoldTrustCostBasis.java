@@ -3,7 +3,9 @@ package app;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -38,10 +40,9 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
             System.exit(1);
         }
         final GoldTrustCostBasis app = new GoldTrustCostBasis();
-        app.taxDataFile = new File(args[0]);
-        if (!app.taxDataFile.canRead()) {
-            System.err.println("Error: Cannot read " + app.taxDataFile.getAbsolutePath());
-            System.exit(2);
+        final String taxDataFileName = args[0];
+        if (!taxDataFileName.equals("-")) {
+            app.taxDataFile = new File(taxDataFileName);
         }
         app.run();
         System.exit(0);
@@ -49,10 +50,14 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
 
     @Override
     public void run() {
+        if (taxDataFile() != null && !taxDataFile().canRead()) {
+            System.err.println("Error: Cannot read " + taxDataFile().getAbsolutePath());
+            System.exit(2);
+        }
         try (Stream<String> lines = getLines()) {
             lines.forEachOrdered(this);
             if (context().getGrossProceedsFormulas().length < 1) {
-                System.err.println("Error: No gross proceeds data read from file");
+                System.err.println("Error: Could not read gross proceeds data from file");
                 System.exit(2);
             }
             final SpreadsheetDocumentHelper docHelper = new SpreadsheetDocumentHelper();
@@ -79,19 +84,30 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
         }
     }
 
+    @SuppressWarnings("resource")
+    private Stream<String> getLines() throws IOException {
+        if (taxDataFile() == null) {
+            final Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
+            scanner.useDelimiter("\n");
+            return scanner.tokens();
+        }
+        final String taxDataFileName = taxDataFile().getName();
+        if (taxDataFileName.endsWith(".pdf")) {
+            final PDFHelper pdfHelper = new PDFHelper();
+            pdfHelper.setStartPage(3);
+            pdfHelper.setEndPage(10);
+            pdfHelper.extractText(taxDataFile());
+            return pdfHelper.getTextLines();
+        }
+        return Files.lines(taxDataFile().toPath());
+    }
+
     private Context context() {
         return this.context;
     }
 
-    private Stream<String> getLines() throws IOException {
-        Stream<String> lines = null;
-        if (this.taxDataFile.getName().endsWith(".pdf")) {
-            final PDFHelper pdfHelper = new PDFHelper();
-            lines = pdfHelper.getTextLines(this.taxDataFile);
-        } else {
-            lines = Files.lines(this.taxDataFile.toPath());
-        }
-        return lines;
+    private File taxDataFile() {
+        return this.taxDataFile;
     }
 
     private static void showUsage() {

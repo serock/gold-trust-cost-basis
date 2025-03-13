@@ -14,8 +14,9 @@ class GrossProceedsDataState implements State {
         if (text.isEmpty()) {
             return;
         }
-        if (text.startsWith("PAST PERFORMANCE ")) {
+        if (text.startsWith("\f")) {
             context.transitionToSearchState();
+            context.state().accept(context, text.substring(1));
             return;
         }
         Matcher matcher;

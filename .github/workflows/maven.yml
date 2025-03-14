@@ -1,0 +1,54 @@
+name: Maven assemblies
+on:
+  release:
+    types: [released]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    name: Maven build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out source code
+      uses: actions/checkout@v4
+    - name: Set up LibreOffice UNO runtime environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install liblibreoffice-java
+    - name: Build and package JAR for Debian
+      run: mvn --batch-mode package
+    - name: Create assembly for Debian
+      run: mvn --batch-mode assembly:single
+    - name: Package JAR for Linux
+      run: mvn --batch-mode --activate-profiles for-linux package
+    - name: Create assembly for Linux
+      run: mvn --batch-mode --activate-profiles for-linux assembly:single
+    - name: Package JAR for MacOS
+      run: mvn --batch-mode --activate-profiles for-macos package
+    - name: Create assembly for MacOS
+      run: mvn --batch-mode --activate-profiles for-macos assembly:single
+    - name: Package JAR for Windows
+      run: mvn --batch-mode --activate-profiles for-windows package
+    - name: Create assembly for Windows
+      run: mvn --batch-mode --activate-profiles for-windows assembly:single
+    - name: Generate sums for artifacts
+      run: |
+        pushd target
+        for file in *.tar.gz *.zip ; do
+          [ -e "$file" ] || continue
+          sha256sum -b "$file" > "$file".sha256
+        done
+        popd
+    - name: Upload artifacts to release
+      run: |
+        if [ "$GITHUB_REF_TYPE" = "tag" ] ; then
+          pushd target
+          for file in *.tar.gz *.zip *.sha256 ; do
+            [ -e "$file" ] || continue
+            gh release upload "$GITHUB_REF_NAME" "$file"
+          done
+          popd
+        fi
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

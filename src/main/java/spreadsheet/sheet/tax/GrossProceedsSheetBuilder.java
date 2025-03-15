@@ -9,10 +9,12 @@ import java.util.TreeMap;
 import com.sun.star.awt.FontWeight;
 import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.sheet.XSpreadsheet;
+import com.sun.star.table.TableSortField;
 import com.sun.star.util.MalformedNumberFormatException;
 
 import spreadsheet.SpreadsheetDocumentHelper;
 import spreadsheet.sheet.SheetBuilder;
+import text.Constants;
 
 public class GrossProceedsSheetBuilder extends SheetBuilder {
 
@@ -28,6 +30,7 @@ public class GrossProceedsSheetBuilder extends SheetBuilder {
         sheetHelper().setSheetName("gld-gross-proceeds");
         sheetHelper().setHeaderProperties(headerProperties);
         sheetHelper().setColumnProperties(columnProperties);
+        sheetHelper().setSortFields(createSortFields());
         sheetHelper().updateSheet(grossProceedsSheet);
         SpreadsheetDocumentHelper.freezeRowsOfActiveSheet(document(), 1);
     }
@@ -72,5 +75,13 @@ public class GrossProceedsSheetBuilder extends SheetBuilder {
         addGoldOuncesSoldColumnProperties(columnProperties, ouncesFormatIndexKey);
         addProceedsColumnProperties(columnProperties, proceedsFormatIndexKey);
         return columnProperties;
+    }
+
+    private static TableSortField[] createSortFields() {
+        TableSortField[] sortFields = new TableSortField[1];
+        sortFields[0] = new TableSortField();
+        sortFields[0].Field = Constants.GP_FIELD_DATE;
+        sortFields[0].IsAscending = true;
+        return sortFields;
     }
 }

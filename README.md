@@ -59,39 +59,61 @@ See the **Troubleshooting** section on the [How to Build the App](/../../wiki/Ho
 
 ## Running the App
 To use the app, a SPDR® Gold Trust Tax Information file from [spdrgoldshares.com](https://www.spdrgoldshares.com/#tax) is required.
-When a PDF is passed to the app, the app will attempt to extract the gross proceeds data and put the data into a LibreOffice Calc spreadsheet.
-This is known to work for tax years 2011 through 2023.
 
-On Linux, the app can be used like this:
+### Tax Years 2011 Through 2023
+**Linux example:**
 
 ```Shell
+cd ~/Downloads
 wget https://www.spdrgoldshares.com/media/GLD/file/SPDR-Gold-Trust-Tax-Information-2023.pdf
 java -jar gold-trust-cost-basis-2024.0.0.jar SPDR-Gold-Trust-Tax-Information-2023.pdf
 ```
 
-However, the app cannot extract text from the 2024 PDF and the app displays the following error message:
+**Windows Command Prompt example:**
 
+```Batchfile
+cd %USERPROFILE%\Downloads
+curl -s -o SPDR-Gold-Trust-Tax-Information-2023.pdf ^
+  https://www.spdrgoldshares.com/media/GLD/file/SPDR-Gold-Trust-Tax-Information-2023.pdf
+java -jar gold-trust-cost-basis-2024.0.0.jar SPDR-Gold-Trust-Tax-Information-2023.pdf
 ```
-Error: Type 3 font found in PDF; use OCR for text extraction
-```
 
-Thus, a different approach can be used for the 2024 PDF:
+### Tax Year 2024
+Because Type 3 fonts are used in the `SPDR-Gold-Trust-Tax-Information-2024.pdf`, convert the PDF pages to images and use OCR to extract text from the PDF.
+See the [How to Configure Tesseract OCR](/../../wiki/How-to-Configure-Tesseract-OCR) page in the Wiki.
 
-1. Use *PDFBox standalone* to convert pages in the PDF to PNG images
-2. Use *Tesseract OCR* to extract the text from the images
-3. Use the app to put the gross proceeds data from the text into a *LibreOffice Calc* spreadsheet
+:warning: The examples below expect the `pdfbox-app-3.0.4.jar` to be in your `Downloads` directory.
 
-**Note:** See the [How to configure Tesseract OCR](/../../wiki/How-to-Configure-Tesseract-OCR) page in the Wiki.
-
-On Linux, the entire process might look like this:
+**Linux example:**
 
 ```Shell
+cd ~/Downloads
 wget https://www.spdrgoldshares.com/media/GLD/file/SPDR-Gold-Trust-Tax-Information-2024.pdf
-java -jar pdfbox-app-3.0.4.jar render -color=GRAY -dpi 300 -format png -startPage=3 -endPage=10 \
+java -jar pdfbox-app-3.0.4.jar render -color=GRAY -dpi 300 -format png \
+     -startPage=3 -endPage=10 \
      -i=SPDR-Gold-Trust-Tax-Information-2024.pdf
 ls -rt1 SPDR-Gold-Trust-Tax-Information-2024-*.png | \
 tesseract - - -l eng --tessdata-dir ~/tessdata gld | \
-java -jar gold-trust-cost-basis-2024.0.0.jar -
+java -jar ~/gold-trust-cost-basis-2024.0.0/gold-trust-cost-basis-2024.0.0.jar -
+rm SPDR-Gold-Trust-Tax-Information-2024-*.png
+```
+
+**Windows Command Prompt example:**
+
+:warning: This example assumes that *Tesseract OCR* was installed for the current user only, not for all users.
+
+```Batchfile
+cd %USERPROFILE%\Downloads
+curl -s -o SPDR-Gold-Trust-Tax-Information-2024.pdf ^
+  https://www.spdrgoldshares.com/media/GLD/file/SPDR-Gold-Trust-Tax-Information-2024.pdf
+java -jar pdfbox-app-3.0.4.jar render -color=GRAY -dpi 300 -format png ^
+     -startPage=3 -endPage=10 ^
+     -i=SPDR-Gold-Trust-Tax-Information-2024.pdf
+dir /b /o:d SPDR-Gold-Trust-Tax-Information-2024-*.png | ^
+%LOCALAPPDATA%\Programs\Tesseract-OCR\tesseract.exe - - ^
+  -l eng --tessdata-dir %USERPROFILE%\tessdata gld | ^
+java -jar %USERPROFILE%\gold-trust-cost-basis-2024.0.0\gold-trust-cost-basis-2024.0.0.jar -
+del SPDR-Gold-Trust-Tax-Information-2024-*.png
 ```
 
 Note that the app does not save the spreadsheet. It is up to the user to decide whether or not to save the spreadsheet.

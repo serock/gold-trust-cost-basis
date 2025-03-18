@@ -15,6 +15,7 @@ import com.sun.star.sheet.XSpreadsheetDocument;
 import pdf.PDFHelper;
 import spreadsheet.SpreadsheetDocumentHelper;
 import spreadsheet.sheet.tax.GrossProceedsSheetBuilder;
+import spreadsheet.sheet.tax.TaxLotsSheetBuilder;
 import text.Context;
 
 public class GoldTrustCostBasis implements Consumer<String>, Runnable {
@@ -62,6 +63,7 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
             }
             final SpreadsheetDocumentHelper docHelper = new SpreadsheetDocumentHelper();
             final XSpreadsheetDocument document = docHelper.createDocument();
+            buildTaxLotsSheet(document);
             buildGrossProceedsSheet(document);
         } catch (final Exception e) {
             e.printStackTrace();
@@ -72,6 +74,13 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
         final GrossProceedsSheetBuilder builder = new GrossProceedsSheetBuilder();
         builder.setDocument(document);
         builder.setSheetFormulas(context().getGrossProceedsFormulas());
+        builder.build();
+    }
+
+    private void buildTaxLotsSheet(final XSpreadsheetDocument document) throws com.sun.star.uno.Exception {
+        final TaxLotsSheetBuilder builder = new TaxLotsSheetBuilder();
+        builder.setDocument(document);
+        builder.setSheetFormulas(context().getTaxLotsFormulas());
         builder.build();
     }
 

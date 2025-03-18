@@ -7,21 +7,28 @@ import java.util.List;
 public class Context {
 
     private final List<String[]> grossProceedsRows;
+    private final List<String[]> taxLotsRows;
 
     private final State grossProceedsDataState = new GrossProceedsDataState();
     private final State grossProceedsHeaderState = new GrossProceedsHeaderState();
     private final State searchState = new SearchState();
+    private final State taxLotsState = new TaxLotsState();
 
     private State state;
     private String taxYear;
 
     public Context() {
         this.grossProceedsRows = new ArrayList<>();
-        transitionToSearchState();
+        this.taxLotsRows = new ArrayList<>();
+        transitionToTaxLotsState();
     }
 
     public String[][] getGrossProceedsFormulas() {
         return getFormulas(grossProceedsRows());
+    }
+
+    public String[][] getTaxLotsFormulas() {
+        return getFormulas(taxLotsRows());
     }
 
     public State state() {
@@ -30,6 +37,10 @@ public class Context {
 
     void addGrossProceedsRow(final String[] row) {
         grossProceedsRows().add(row);
+    }
+
+    void addTaxLotsRow(final String[] row) {
+        taxLotsRows().add(row);
     }
 
     public boolean hasGrossProceedsHeader() {
@@ -54,6 +65,10 @@ public class Context {
 
     void transitionToSearchState() {
         setState(searchState());
+    }
+
+    void transitionToTaxLotsState() {
+        setState(taxLotsState());
     }
 
     private State grossProceedsDataState() {
@@ -83,5 +98,13 @@ public class Context {
 
     private void setState(final State newState) {
         this.state = newState;
+    }
+
+    private List<String[]> taxLotsRows() {
+        return this.taxLotsRows;
+    }
+
+    private State taxLotsState() {
+        return this.taxLotsState;
     }
 }

@@ -24,14 +24,14 @@ public class GrossProceedsSheetBuilder extends SheetBuilder {
 
     @Override
     public void build() throws IllegalArgumentException, com.sun.star.uno.Exception {
-        final XSpreadsheet grossProceedsSheet = SpreadsheetDocumentHelper.getSheet(document(), 0);
+        final XSpreadsheet grossProceedsSheet = SpreadsheetDocumentHelper.addSheet(document(), "gld-gross-proceeds");
         final SortedMap<String, Object> headerProperties = createHeaderProperties();
         final List<SortedMap<String, Object>> columnProperties = createColumnProperties();
-        sheetHelper().setSheetName("gld-gross-proceeds");
         sheetHelper().setHeaderProperties(headerProperties);
         sheetHelper().setColumnProperties(columnProperties);
         sheetHelper().setSortFields(createSortFields());
         sheetHelper().updateSheet(grossProceedsSheet);
+        SpreadsheetDocumentHelper.setActiveSheet(document(), grossProceedsSheet);
         SpreadsheetDocumentHelper.freezeRowsOfActiveSheet(document(), 1);
     }
 

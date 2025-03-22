@@ -74,9 +74,12 @@ public class SheetHelper {
         this.sortFields = fields;
     }
 
-    public void updateSheet(final XSpreadsheet sheet) throws com.sun.star.uno.Exception {
+    public void updateSheet(final XSpreadsheet sheet, final boolean optimalWidth) throws com.sun.star.uno.Exception {
         if (sheetName() != null) {
             setSheetName(sheet);
+        }
+        if (sheetFormulas() != null) {
+            setFormulas(sheet);
         }
         if (!columnProperties().isEmpty()) {
             setColumnProperties(sheet);
@@ -84,10 +87,9 @@ public class SheetHelper {
         if (!headerProperties().isEmpty()) {
             setHeaderProperties(sheet);
         }
-        if (sheetFormulas() != null) {
-            setFormulas(sheet);
+        if (optimalWidth) {
+            setOptimalWidth(sheet);
         }
-        setOptimalWidth(sheet);
         if (sortFields() != null) {
             sort(sheet);
         }

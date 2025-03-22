@@ -14,6 +14,7 @@ import com.sun.star.sheet.XSpreadsheetDocument;
 
 import pdf.PDFHelper;
 import spreadsheet.SpreadsheetDocumentHelper;
+import spreadsheet.sheet.tax.GoldSalesSheetBuilder;
 import spreadsheet.sheet.tax.GrossProceedsSheetBuilder;
 import spreadsheet.sheet.tax.TaxLotsSheetBuilder;
 import text.Context;
@@ -22,9 +23,13 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
 
     private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("app.debug", "false"));
 
-    private final Context context = new Context();
+    private final Context context;
 
     private File taxDataFile;
+
+    public GoldTrustCostBasis(final Context aContext) {
+        this.context = aContext;
+    }
 
     @Override
     public void accept(final String text) {
@@ -40,10 +45,14 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
             showUsage();
             System.exit(1);
         }
-        final GoldTrustCostBasis app = new GoldTrustCostBasis();
-        final String taxDataFileName = args[0];
-        if (!taxDataFileName.equals("-")) {
-            app.taxDataFile = new File(taxDataFileName);
+        GoldTrustCostBasis app = null;
+        final String fileName = args[0];
+        app = new GoldTrustCostBasis((fileName.endsWith(".ods")) ? Context.NullContext() : Context.DefaultContext());
+        if (fileName.endsWith(".ods") || fileName.endsWith(".pdf") || fileName.endsWith(".txt")) {
+            app.taxDataFile = new File(fileName);
+        } else if (!fileName.equals("-")) {
+            showUsage();
+            System.exit(1);
         }
         app.run();
         System.exit(0);
@@ -55,19 +64,32 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
             System.err.println("Error: Cannot read " + taxDataFile().getAbsolutePath());
             System.exit(2);
         }
-        try (Stream<String> lines = getLines()) {
-            lines.forEachOrdered(this);
-            if (context().getGrossProceedsFormulas().length < 1) {
-                System.err.println("Error: Could not read gross proceeds data from file");
-                System.exit(2);
-            }
+        try {
             final SpreadsheetDocumentHelper docHelper = new SpreadsheetDocumentHelper();
-            final XSpreadsheetDocument document = docHelper.createDocument();
-            buildTaxLotsSheet(document);
-            buildGrossProceedsSheet(document);
+            if (context().equals(Context.DefaultContext())) {
+                try (Stream<String> lines = getLines()) {
+                    lines.forEachOrdered(this);
+                    if (context().getGrossProceedsFormulas().length < 1) {
+                        System.err.println("Error: Could not read gross proceeds data from file");
+                        System.exit(2);
+                    }
+                    final XSpreadsheetDocument document = docHelper.createDocument();
+                    buildGrossProceedsSheet(document);
+                    buildTaxLotsSheet(document);
+                }
+            } else {
+                final XSpreadsheetDocument document = docHelper.loadDocument(taxDataFile());
+                buildGoldSalesSheet(document);
+            }
         } catch (final Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static void buildGoldSalesSheet(final XSpreadsheetDocument document) throws com.sun.star.uno.Exception {
+        final GoldSalesSheetBuilder builder = new GoldSalesSheetBuilder();
+        builder.setDocument(document);
+        builder.build();
     }
 
     private void buildGrossProceedsSheet(final XSpreadsheetDocument document) throws IllegalArgumentException, com.sun.star.uno.Exception {
@@ -120,6 +142,6 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
     }
 
     private static void showUsage() {
-        System.out.println("Usage: java -jar gold-trust-cost-basis.jar <gold-tax-data-pdf-or-txt-file>");
+        System.out.println("Usage: java -jar gold-trust-cost-basis.jar <gold-tax-data-file>");
     }
 }

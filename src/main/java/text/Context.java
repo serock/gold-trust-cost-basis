@@ -17,10 +17,30 @@ public class Context {
     private State state;
     private String taxYear;
 
-    public Context() {
-        this.grossProceedsRows = new ArrayList<>();
-        this.taxLotsRows = new ArrayList<>();
-        transitionToTaxLotsState();
+    private static final Context DEFAULT_CONTEXT = new Context(false);
+    private static final Context NULL_CONTEXT = new Context();
+
+    public static Context NullContext() {
+        return NULL_CONTEXT;
+    }
+
+    public static Context DefaultContext() {
+        return DEFAULT_CONTEXT;
+    }
+
+    private Context() {
+        this(true);
+    }
+
+    private Context(final boolean isNullContext) {
+        if (isNullContext) {
+            this.grossProceedsRows = null;
+            this.taxLotsRows = null;
+        } else {
+            this.grossProceedsRows = new ArrayList<>();
+            this.taxLotsRows = new ArrayList<>();
+            transitionToTaxLotsState();
+        }
     }
 
     public String[][] getGrossProceedsFormulas() {

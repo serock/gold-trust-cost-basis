@@ -6,11 +6,12 @@ public class TaxLotsState implements State {
     @Override
     public void accept(final Context context, final String text) {
         String[] row = new String[] {
-                "Shares",
+                "Tax Lot ID",
+                "Number of Shares",
                 "Date Acquired",
                 "Date Sold",
                 "Proceeds",
-                "Cost"
+                "Cost Basis"
         };
         context.addTaxLotsRow(row);
         context.transitionToSearchState();

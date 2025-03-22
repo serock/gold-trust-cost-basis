@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 package spreadsheet;
 
+import java.io.File;
+import java.net.MalformedURLException;
+
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.comp.helper.Bootstrap;
 import com.sun.star.comp.helper.BootstrapException;
@@ -42,6 +45,10 @@ public class SpreadsheetDocumentHelper {
 
     public XSpreadsheetDocument createDocument() throws IllegalArgumentException, IOException {
         return UnoRuntime.queryInterface(XSpreadsheetDocument.class, this.desktop.loadComponentFromURL("private:factory/scalc", "_blank", FrameSearchFlag.CREATE, new PropertyValue[0]));
+    }
+
+    public XSpreadsheetDocument loadDocument(final File file) throws IllegalArgumentException, IOException, MalformedURLException {
+        return UnoRuntime.queryInterface(XSpreadsheetDocument.class, this.desktop.loadComponentFromURL(file.toURI().toURL().toString(), "_blank", FrameSearchFlag.CREATE, new PropertyValue[0]));
     }
 
     public static Integer getCurrencyNumberFormat(final XSpreadsheetDocument document) {
@@ -101,6 +108,12 @@ public class SpreadsheetDocumentHelper {
         final XNumberFormatsSupplier numberFormatsSupplier = UnoRuntime.queryInterface(XNumberFormatsSupplier.class, document);
         final XNumberFormats numberFormats = numberFormatsSupplier.getNumberFormats();
         return numberFormats.addNew(formatCode, locale);
+    }
+
+    public static int queryNumberFormatCode(final XSpreadsheetDocument document, final String formatCode) {
+        final XNumberFormatsSupplier numberFormatsSupplier = UnoRuntime.queryInterface(XNumberFormatsSupplier.class, document);
+        final XNumberFormats numberFormats = numberFormatsSupplier.getNumberFormats();
+        return numberFormats.queryKey(formatCode, locale, false);
     }
 
     private static XController getCurrentController(final XSpreadsheetDocument document) {

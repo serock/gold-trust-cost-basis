@@ -20,54 +20,67 @@ public class TaxLotsSheetBuilder extends SheetBuilder {
     public void build() throws Exception {
         final XSpreadsheet taxLotsSheet = SpreadsheetDocumentHelper.getSheet(document(), 0);
         final SortedMap<String, Object> headerProperties = createHeaderProperties();
-        final List<SortedMap<String, Object>> columnProperties = createColumnProperties();
+        final List<SortedMap<String, Object>> columnPropertiesCollection = createColumnPropertiesCollection();
         sheetHelper().setSheetName("tax-lots");
         sheetHelper().setHeaderProperties(headerProperties);
-        sheetHelper().setColumnProperties(columnProperties);
-        sheetHelper().updateSheet(taxLotsSheet);
+        sheetHelper().setColumnProperties(columnPropertiesCollection);
+        sheetHelper().updateSheet(taxLotsSheet, true);
         SpreadsheetDocumentHelper.setActiveSheet(document(), taxLotsSheet);
         SpreadsheetDocumentHelper.freezeRowsOfActiveSheet(document(), 1);
     }
 
-    private void addCostColumnProperties(final List<SortedMap<String, Object>> columnProperties) {
-        final SortedMap<String, Object> columnPropertiesItem = new TreeMap<>();
-        columnPropertiesItem.put("NumberFormat", SpreadsheetDocumentHelper.getCurrencyNumberFormat(document()));
-        columnProperties.add(columnPropertiesItem);
+    private void addCostColumnProperties(final List<SortedMap<String, Object>> columnPropertiesCollection) {
+        final SortedMap<String, Object> columnProperties = new TreeMap<>();
+        addNumberFormatColumnProperty(columnProperties, SpreadsheetDocumentHelper.getCurrencyNumberFormat(document()));
+        columnPropertiesCollection.add(columnProperties);
     }
 
-    private void addDateAcquiredColumnProperties(final List<SortedMap<String, Object>> columnProperties) {
-        final SortedMap<String, Object> columnPropertiesItem = new TreeMap<>();
-        columnPropertiesItem.put("NumberFormat", SpreadsheetDocumentHelper.getDateNumberFormat(document()));
-        columnProperties.add(columnPropertiesItem);
+    private void addDateAcquiredColumnProperties(final List<SortedMap<String, Object>> columnPropertiesCollection) {
+        final int dateFormatIndexKey = SpreadsheetDocumentHelper.queryNumberFormatCode(document(), "MM/DD/YYYY");
+        final SortedMap<String, Object> columnProperties = new TreeMap<>();
+        addNumberFormatColumnProperty(columnProperties, Integer.valueOf(dateFormatIndexKey));
+        columnPropertiesCollection.add(columnProperties);
     }
 
-    private void addDateSoldColumnProperties(final List<SortedMap<String, Object>> columnProperties) {
-        final SortedMap<String, Object> columnPropertiesItem = new TreeMap<>();
-        columnPropertiesItem.put("NumberFormat", SpreadsheetDocumentHelper.getDateNumberFormat(document()));
-        columnProperties.add(columnPropertiesItem);
+    private void addDateSoldColumnProperties(final List<SortedMap<String, Object>> columnPropertiesCollection) {
+        final int dateFormatIndexKey = SpreadsheetDocumentHelper.queryNumberFormatCode(document(), "MM/DD/YYYY");
+        final SortedMap<String, Object> columnProperties = new TreeMap<>();
+        addNumberFormatColumnProperty(columnProperties, Integer.valueOf(dateFormatIndexKey));
+        columnPropertiesCollection.add(columnProperties);
     }
 
-    private void addProceedsColumnProperties(final List<SortedMap<String, Object>> columnProperties) {
-        final SortedMap<String, Object> columnPropertiesItem = new TreeMap<>();
-        columnPropertiesItem.put("NumberFormat", SpreadsheetDocumentHelper.getCurrencyNumberFormat(document()));
-        columnProperties.add(columnPropertiesItem);
+    private void addProceedsColumnProperties(final List<SortedMap<String, Object>> columnPropertiesCollection) {
+        final SortedMap<String, Object> columnProperties = new TreeMap<>();
+        addNumberFormatColumnProperty(columnProperties, SpreadsheetDocumentHelper.getCurrencyNumberFormat(document()));
+        columnPropertiesCollection.add(columnProperties);
     }
 
-    private static void addSharesColumnProperties(final List<SortedMap<String, Object>> columnProperties, final int indexKey) {
-        final SortedMap<String, Object> columnPropertiesItem = new TreeMap<>();
-        columnPropertiesItem.put("NumberFormat", Integer.valueOf(indexKey));
-        columnProperties.add(columnPropertiesItem);
+    private static void addNumberFormatColumnProperty(final SortedMap<String, Object> columnProperties, final Integer indexKey) {
+        columnProperties.put("NumberFormat", indexKey);
     }
 
-    private List<SortedMap<String, Object>> createColumnProperties() throws MalformedNumberFormatException {
-        final int sharesFormatIndexKey = SpreadsheetDocumentHelper.addNumberFormatCode(document(), "#,##0.0000;[RED]-#,##0.0000");
-        final List<SortedMap<String, Object>> columnProperties = new ArrayList<>(4);
-        addSharesColumnProperties(columnProperties, sharesFormatIndexKey);
-        addDateAcquiredColumnProperties(columnProperties);
-        addDateSoldColumnProperties(columnProperties);
-        addProceedsColumnProperties(columnProperties);
-        addCostColumnProperties(columnProperties);
-        return columnProperties;
+    private void addSharesColumnProperties(final List<SortedMap<String, Object>> columnPropertiesCollection) throws MalformedNumberFormatException {
+        final int sharesFormatIndexKey = SpreadsheetDocumentHelper.addNumberFormatCode(document(), "#,##0.000;[RED]-#,##0.000");
+        final SortedMap<String, Object> columnProperties = new TreeMap<>();
+        addNumberFormatColumnProperty(columnProperties, Integer.valueOf(sharesFormatIndexKey));
+        columnPropertiesCollection.add(columnProperties);
+    }
+
+    private void addTaxLotIDColumnProperties(final List<SortedMap<String, Object>> columnPropertiesCollection) {
+        final SortedMap<String, Object> columnProperties = new TreeMap<>();
+        columnProperties.put("NumberFormat", SpreadsheetDocumentHelper.getTextFormat(document()));
+        columnPropertiesCollection.add(columnProperties);
+    }
+
+    private List<SortedMap<String, Object>> createColumnPropertiesCollection() throws MalformedNumberFormatException {
+        final List<SortedMap<String, Object>> columnPropertiesCollection = new ArrayList<>(4);
+        addTaxLotIDColumnProperties(columnPropertiesCollection);
+        addSharesColumnProperties(columnPropertiesCollection);
+        addDateAcquiredColumnProperties(columnPropertiesCollection);
+        addDateSoldColumnProperties(columnPropertiesCollection);
+        addProceedsColumnProperties(columnPropertiesCollection);
+        addCostColumnProperties(columnPropertiesCollection);
+        return columnPropertiesCollection;
     }
 
     private SortedMap<String, Object> createHeaderProperties() {

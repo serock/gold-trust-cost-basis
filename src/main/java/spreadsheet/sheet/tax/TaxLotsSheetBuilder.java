@@ -8,7 +8,6 @@ import java.util.TreeMap;
 
 import com.sun.star.awt.FontWeight;
 import com.sun.star.sheet.XSpreadsheet;
-import com.sun.star.uno.Exception;
 import com.sun.star.util.MalformedNumberFormatException;
 
 import spreadsheet.SpreadsheetDocumentHelper;
@@ -17,7 +16,7 @@ import spreadsheet.sheet.SheetBuilder;
 public class TaxLotsSheetBuilder extends SheetBuilder {
 
     @Override
-    public void build() throws Exception {
+    public void build() throws com.sun.star.uno.Exception {
         final XSpreadsheet taxLotsSheet = SpreadsheetDocumentHelper.getSheet(document(), 0);
         final SortedMap<String, Object> headerProperties = createHeaderProperties();
         final List<SortedMap<String, Object>> columnPropertiesCollection = createColumnPropertiesCollection();

@@ -14,6 +14,7 @@ import com.sun.star.sheet.XSpreadsheetDocument;
 
 import pdf.PDFHelper;
 import spreadsheet.SpreadsheetDocumentHelper;
+import spreadsheet.sheet.tax.GoldCostBasisSheetBuilder;
 import spreadsheet.sheet.tax.GoldOuncesSheetBuilder;
 import spreadsheet.sheet.tax.GoldSalesSheetBuilder;
 import spreadsheet.sheet.tax.GrossProceedsSheetBuilder;
@@ -81,7 +82,11 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
                 }
             } else {
                 final XSpreadsheetDocument document = docHelper.loadDocument(taxDataFile());
-                buildGoldSalesSheet(document);
+                if (SpreadsheetDocumentHelper.hasSheet(document, "gold-sales")) {
+                    buildGoldCostBasisSheet(document);
+                } else {
+                    buildGoldSalesSheet(document);
+                }
             }
         } catch (final Exception e) {
             e.printStackTrace();
@@ -92,6 +97,12 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
         final GoldOuncesSheetBuilder builder = new GoldOuncesSheetBuilder();
         builder.setDocument(document);
         builder.setSheetFormulas(context().getGoldOuncesFormulas());
+        builder.build();
+    }
+
+    private static void buildGoldCostBasisSheet(final XSpreadsheetDocument document) throws com.sun.star.uno.Exception {
+        final GoldCostBasisSheetBuilder builder = new GoldCostBasisSheetBuilder();
+        builder.setDocument(document);
         builder.build();
     }
 

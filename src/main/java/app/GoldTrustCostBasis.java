@@ -14,6 +14,7 @@ import com.sun.star.sheet.XSpreadsheetDocument;
 
 import pdf.PDFHelper;
 import spreadsheet.SpreadsheetDocumentHelper;
+import spreadsheet.sheet.tax.GoldOuncesSheetBuilder;
 import spreadsheet.sheet.tax.GoldSalesSheetBuilder;
 import spreadsheet.sheet.tax.GrossProceedsSheetBuilder;
 import spreadsheet.sheet.tax.TaxLotsSheetBuilder;
@@ -65,7 +66,7 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
             System.exit(2);
         }
         try {
-            final SpreadsheetDocumentHelper docHelper = new SpreadsheetDocumentHelper();
+            final SpreadsheetDocumentHelper docHelper = SpreadsheetDocumentHelper.getInstance();
             if (context().equals(Context.DefaultContext())) {
                 try (Stream<String> lines = getLines()) {
                     lines.forEachOrdered(this);
@@ -74,8 +75,9 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
                         System.exit(2);
                     }
                     final XSpreadsheetDocument document = docHelper.createDocument();
-                    buildGrossProceedsSheet(document);
                     buildTaxLotsSheet(document);
+                    buildGoldOuncesSheet(document);
+                    buildGrossProceedsSheet(document);
                 }
             } else {
                 final XSpreadsheetDocument document = docHelper.loadDocument(taxDataFile());
@@ -84,6 +86,13 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
         } catch (final Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void buildGoldOuncesSheet(final XSpreadsheetDocument document) throws IllegalArgumentException, com.sun.star.uno.Exception {
+        final GoldOuncesSheetBuilder builder = new GoldOuncesSheetBuilder();
+        builder.setDocument(document);
+        builder.setSheetFormulas(context().getGoldOuncesFormulas());
+        builder.build();
     }
 
     private static void buildGoldSalesSheet(final XSpreadsheetDocument document) throws com.sun.star.uno.Exception {
@@ -115,6 +124,10 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
         }
     }
 
+    private Context context() {
+        return this.context;
+    }
+
     @SuppressWarnings("resource")
     private Stream<String> getLines() throws IOException {
         if (taxDataFile() == null) {
@@ -133,15 +146,11 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
         return Files.lines(taxDataFile().toPath());
     }
 
-    private Context context() {
-        return this.context;
+    private static void showUsage() {
+        System.out.println("Usage: java -jar gold-trust-cost-basis.jar <gold-tax-data-file>");
     }
 
     private File taxDataFile() {
         return this.taxDataFile;
-    }
-
-    private static void showUsage() {
-        System.out.println("Usage: java -jar gold-trust-cost-basis.jar <gold-tax-data-file>");
     }
 }

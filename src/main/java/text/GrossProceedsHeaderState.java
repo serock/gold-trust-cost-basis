@@ -14,10 +14,15 @@ class GrossProceedsHeaderState implements State {
         Matcher matcher;
         matcher = patternHeader.matcher(text);
         if (matcher.find()) {
+            if (!context.hasGoldOuncesHeader()) {
+                context.addGoldOuncesRow(new String[] {
+                        "Date",
+                        "Gold Ounces Per Share"
+                });
+            }
             if (!context.hasGrossProceedsHeader()) {
                 context.addGrossProceedsRow(new String[] {
                         "Date",
-                        "Gold Ounces Per Share",
                         "Gold Ounces Sold Per Share",
                         "Proceeds Per Share"
                 });

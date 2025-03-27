@@ -7,30 +7,28 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import com.sun.star.awt.FontWeight;
-import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.sheet.XSpreadsheet;
 import com.sun.star.table.TableSortField;
+import com.sun.star.uno.Exception;
 import com.sun.star.util.MalformedNumberFormatException;
 
 import spreadsheet.SpreadsheetDocumentHelper;
 import spreadsheet.sheet.SheetBuilder;
 import text.Constants;
 
-public class GrossProceedsSheetBuilder extends SheetBuilder {
-
-    public GrossProceedsSheetBuilder() {
-        super();
-    }
+public class GoldOuncesSheetBuilder extends SheetBuilder {
 
     @Override
-    public void build() throws IllegalArgumentException, com.sun.star.uno.Exception {
-        final XSpreadsheet grossProceedsSheet = SpreadsheetDocumentHelper.addSheet(document(), "gld-gross-proceeds");
+    public void build() throws Exception {
+        final XSpreadsheet goldOuncesSheet = SpreadsheetDocumentHelper.addSheet(document(), "gld-gold-ounces");
         final SortedMap<String, Object> headerProperties = createHeaderProperties();
         final List<SortedMap<String, Object>> columnPropertiesCollection = createColumnPropertiesCollection();
         sheetHelper().setHeaderProperties(headerProperties);
         sheetHelper().setColumnProperties(columnPropertiesCollection);
         sheetHelper().setSortFields(createSortFields());
-        sheetHelper().updateSheet(grossProceedsSheet, true);
+        sheetHelper().updateSheet(goldOuncesSheet, true);
+        SpreadsheetDocumentHelper.setActiveSheet(document(), goldOuncesSheet);
+        SpreadsheetDocumentHelper.freezeRowsOfActiveSheet(document(), 1);
     }
 
     private void addDateColumnProperties(final List<SortedMap<String, Object>> columnPropertiesCollection) {
@@ -44,25 +42,17 @@ public class GrossProceedsSheetBuilder extends SheetBuilder {
         columnProperties.put("NumberFormat", indexKey);
     }
 
-    private void addOuncesSoldColumnProperties(final List<SortedMap<String, Object>> columnPropertiesCollection) {
-        final int ouncesFormatIndexKey = SpreadsheetDocumentHelper.queryNumberFormatCode(document(), "#,##0.00000000;[RED]-#,##0.00000000");
+    private void addOuncesColumnProperties(final List<SortedMap<String, Object>> columnPropertiesCollection) throws MalformedNumberFormatException {
+        final int ouncesFormatIndexKey = SpreadsheetDocumentHelper.addNumberFormatCode(document(), "#,##0.00000000;[RED]-#,##0.00000000");
         final SortedMap<String, Object> columnProperties = new TreeMap<>();
         addNumberFormatColumnProperty(columnProperties, Integer.valueOf(ouncesFormatIndexKey));
-        columnPropertiesCollection.add(columnProperties);
-    }
-
-    private void addProceedsColumnProperties(final List<SortedMap<String, Object>> columnPropertiesCollection) throws MalformedNumberFormatException {
-        final int proceedsFormatIndexKey = SpreadsheetDocumentHelper.addNumberFormatCode(document(), "[$$-409]#,##0.00000000;[RED]-[$$-409]#,##0.00000000");
-        final SortedMap<String, Object> columnProperties = new TreeMap<>();
-        addNumberFormatColumnProperty(columnProperties, Integer.valueOf(proceedsFormatIndexKey));
         columnPropertiesCollection.add(columnProperties);
     }
 
     private List<SortedMap<String, Object>> createColumnPropertiesCollection() throws MalformedNumberFormatException {
         final List<SortedMap<String, Object>> columnPropertiesCollection = new ArrayList<>(4);
         addDateColumnProperties(columnPropertiesCollection);
-        addOuncesSoldColumnProperties(columnPropertiesCollection);
-        addProceedsColumnProperties(columnPropertiesCollection);
+        addOuncesColumnProperties(columnPropertiesCollection);
         return columnPropertiesCollection;
     }
 

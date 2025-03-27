@@ -6,6 +6,7 @@ import java.util.List;
 
 public class Context {
 
+    private final List<String[]> goldOuncesRows;
     private final List<String[]> grossProceedsRows;
     private final List<String[]> taxLotsRows;
 
@@ -20,12 +21,12 @@ public class Context {
     private static final Context DEFAULT_CONTEXT = new Context(false);
     private static final Context NULL_CONTEXT = new Context();
 
-    public static Context NullContext() {
-        return NULL_CONTEXT;
-    }
-
     public static Context DefaultContext() {
         return DEFAULT_CONTEXT;
+    }
+
+    public static Context NullContext() {
+        return NULL_CONTEXT;
     }
 
     private Context() {
@@ -34,13 +35,19 @@ public class Context {
 
     private Context(final boolean isNullContext) {
         if (isNullContext) {
+            this.goldOuncesRows = null;
             this.grossProceedsRows = null;
             this.taxLotsRows = null;
         } else {
+            this.goldOuncesRows = new ArrayList<>();
             this.grossProceedsRows = new ArrayList<>();
             this.taxLotsRows = new ArrayList<>();
             transitionToTaxLotsState();
         }
+    }
+
+    public String[][] getGoldOuncesFormulas() {
+        return getFormulas(goldOuncesRows());
     }
 
     public String[][] getGrossProceedsFormulas() {
@@ -55,12 +62,20 @@ public class Context {
         return this.state;
     }
 
+    void addGoldOuncesRow(final String[] row) {
+        goldOuncesRows().add(row);
+    }
+
     void addGrossProceedsRow(final String[] row) {
         grossProceedsRows().add(row);
     }
 
     void addTaxLotsRow(final String[] row) {
         taxLotsRows().add(row);
+    }
+
+    public boolean hasGoldOuncesHeader() {
+        return !goldOuncesRows().isEmpty();
     }
 
     public boolean hasGrossProceedsHeader() {
@@ -91,14 +106,6 @@ public class Context {
         setState(taxLotsState());
     }
 
-    private State grossProceedsDataState() {
-        return this.grossProceedsDataState;
-    }
-
-    private State grossProceedsHeaderState() {
-        return this.grossProceedsHeaderState;
-    }
-
     private static String[][] getFormulas(final List<String[]> rows) {
         final String[][] formulas = new String[rows.size()][];
         int rowIndex = 0;
@@ -106,6 +113,18 @@ public class Context {
             formulas[rowIndex++] = row;
         }
         return formulas;
+    }
+
+    private List<String[]> goldOuncesRows() {
+        return this.goldOuncesRows;
+    }
+
+    private State grossProceedsDataState() {
+        return this.grossProceedsDataState;
+    }
+
+    private State grossProceedsHeaderState() {
+        return this.grossProceedsHeaderState;
     }
 
     private List<String[]> grossProceedsRows() {

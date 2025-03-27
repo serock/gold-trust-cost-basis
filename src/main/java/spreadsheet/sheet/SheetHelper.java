@@ -17,6 +17,7 @@ import com.sun.star.lang.IndexOutOfBoundsException;
 import com.sun.star.lang.WrappedTargetException;
 import com.sun.star.sheet.XCellAddressable;
 import com.sun.star.sheet.XCellRangeAddressable;
+import com.sun.star.sheet.XCellRangeData;
 import com.sun.star.sheet.XCellRangeFormula;
 import com.sun.star.sheet.XSpreadsheet;
 import com.sun.star.sheet.XUsedAreaCursor;
@@ -45,6 +46,14 @@ public class SheetHelper {
 
     public static CellAddress getCellAddress(final XSpreadsheet sheet, final int column, final int row) throws IndexOutOfBoundsException {
         return UnoRuntime.queryInterface(XCellAddressable.class, sheet.getCellByPosition(column, row)).getCellAddress();
+    }
+
+    public static double getCellValue(final XSpreadsheet sheet, final String cellName) throws IndexOutOfBoundsException {
+        return sheet.getCellRangeByName(cellName).getCellByPosition(0, 0).getValue();
+    }
+
+    public static Object[][] getData(final XSpreadsheet sheet) {
+       return UnoRuntime.queryInterface(XCellRangeData.class, getUsedAreaCursor(sheet)).getDataArray();
     }
 
     public boolean isColumnEmpty(final int column) {
@@ -81,10 +90,14 @@ public class SheetHelper {
         if (sheetFormulas() != null) {
             setFormulas(sheet);
         }
+        if (!headerProperties().isEmpty()) {
+            setHeaderProperties(sheet);
+        }
         if (!columnProperties().isEmpty()) {
             setColumnProperties(sheet);
         }
         if (!headerProperties().isEmpty()) {
+            // do again for NumberFormat property
             setHeaderProperties(sheet);
         }
         if (optimalWidth) {

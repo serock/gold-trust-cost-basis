@@ -20,6 +20,8 @@ import com.sun.star.lang.IllegalArgumentException;
 import com.sun.star.lang.IndexOutOfBoundsException;
 import com.sun.star.lang.Locale;
 import com.sun.star.lang.WrappedTargetException;
+import com.sun.star.lang.XMultiComponentFactory;
+import com.sun.star.sheet.XFunctionAccess;
 import com.sun.star.sheet.XSpreadsheet;
 import com.sun.star.sheet.XSpreadsheetDocument;
 import com.sun.star.sheet.XSpreadsheetView;
@@ -36,19 +38,47 @@ public class SpreadsheetDocumentHelper {
 
     private final static Locale locale = new Locale();
 
-    private final XDesktop2 desktop;
+    private static SpreadsheetDocumentHelper spreadsheetDocumentHelper;
 
-    public SpreadsheetDocumentHelper() throws BootstrapException {
-        final XComponentContext componentContext = Bootstrap.bootstrap();
-        this.desktop = theDesktop.get(componentContext);
+    private final XComponentContext componentContext;
+    private final XDesktop2 desktop;
+    private final XMultiComponentFactory serviceManager;
+
+    public static SpreadsheetDocumentHelper getInstance() throws BootstrapException {
+        if (spreadsheetDocumentHelper == null) {
+            spreadsheetDocumentHelper = new SpreadsheetDocumentHelper();
+        }
+        return spreadsheetDocumentHelper;
+    }
+
+    private SpreadsheetDocumentHelper() throws BootstrapException {
+        this.componentContext = Bootstrap.bootstrap();
+        this.serviceManager = this.componentContext.getServiceManager();
+        this.desktop = theDesktop.get(this.componentContext);
     }
 
     public XSpreadsheetDocument createDocument() throws IllegalArgumentException, IOException {
         return UnoRuntime.queryInterface(XSpreadsheetDocument.class, this.desktop.loadComponentFromURL("private:factory/scalc", "_blank", FrameSearchFlag.CREATE, new PropertyValue[0]));
     }
 
+    public XFunctionAccess createFunctionAccess() throws com.sun.star.uno.Exception {
+        final Object object = this.serviceManager.createInstanceWithContext("com.sun.star.sheet.FunctionAccess", this.componentContext);
+        return UnoRuntime.queryInterface(XFunctionAccess.class, object);
+    }
+
     public XSpreadsheetDocument loadDocument(final File file) throws IllegalArgumentException, IOException, MalformedURLException {
         return UnoRuntime.queryInterface(XSpreadsheetDocument.class, this.desktop.loadComponentFromURL(file.toURI().toURL().toString(), "_blank", FrameSearchFlag.CREATE, new PropertyValue[0]));
+    }
+
+    public static Double dateValue(final String date) throws IllegalArgumentException, com.sun.star.uno.Exception {
+        Double dateValue = Double.valueOf(0.0d);
+        try {
+            final Object[] args = {date};
+            dateValue = (Double) getInstance().createFunctionAccess().callFunction("DATEVALUE", args);
+        } catch (final BootstrapException e) {
+            e.printStackTrace();
+        }
+        return dateValue;
     }
 
     public static Integer getCurrencyNumberFormat(final XSpreadsheetDocument document) {
@@ -114,6 +144,21 @@ public class SpreadsheetDocumentHelper {
         final XNumberFormatsSupplier numberFormatsSupplier = UnoRuntime.queryInterface(XNumberFormatsSupplier.class, document);
         final XNumberFormats numberFormats = numberFormatsSupplier.getNumberFormats();
         return numberFormats.queryKey(formatCode, locale, false);
+    }
+
+    public static int year(final double date) throws IllegalArgumentException, com.sun.star.uno.Exception {
+        return year(Double.valueOf(date));
+    }
+
+    public static int year(final Double date) throws IllegalArgumentException, com.sun.star.uno.Exception {
+        Double year = Double.valueOf(0.0d);
+        try {
+            final Object[] args = {date};
+            year = (Double) getInstance().createFunctionAccess().callFunction("YEAR", args);
+        } catch (final BootstrapException e) {
+            e.printStackTrace();
+        }
+        return year.intValue();
     }
 
     private static XController getCurrentController(final XSpreadsheetDocument document) {

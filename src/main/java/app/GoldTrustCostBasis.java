@@ -79,14 +79,13 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
                     buildTaxLotsSheet(document);
                     buildGoldOuncesSheet(document);
                     buildGrossProceedsSheet(document);
+                    SpreadsheetDocumentHelper.setActiveSheet(document, SpreadsheetDocumentHelper.getSheet(document, "tax-lots"));
                 }
             } else {
                 final XSpreadsheetDocument document = docHelper.loadDocument(taxDataFile());
-                if (SpreadsheetDocumentHelper.hasSheet(document, "gold-sales")) {
-                    buildGoldCostBasisSheet(document);
-                } else {
-                    buildGoldSalesSheet(document);
-                }
+                buildGoldSalesSheet(document);
+                buildGoldCostBasisSheet(document);
+                SpreadsheetDocumentHelper.setActiveSheet(document, SpreadsheetDocumentHelper.getSheet(document, "gold-cost-basis"));
             }
         } catch (final Exception e) {
             e.printStackTrace();

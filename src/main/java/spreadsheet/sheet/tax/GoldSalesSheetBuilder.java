@@ -147,8 +147,7 @@ public class GoldSalesSheetBuilder extends SheetBuilder {
                                 });
             }
         }
-        final String[][] array = new String[rowsCollection.size()][];
-        return rowsCollection.toArray(array);
+        return rowsCollection.toArray(new String[0][0]);
     }
 
     private Object[][] goldOuncesData() throws WrappedTargetException, NoSuchElementException {

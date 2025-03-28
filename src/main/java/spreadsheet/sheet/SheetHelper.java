@@ -32,7 +32,7 @@ import com.sun.star.util.XSortable;
 
 public class SheetHelper {
 
-    private static final String[] EMPTY_STRING_ARRAY = new String[] {};
+    private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     private List<SortedMap<String, Object>> columnProperties = Collections.emptyList();
     private SortedMap<String, Object> headerProperties = Collections.emptySortedMap();

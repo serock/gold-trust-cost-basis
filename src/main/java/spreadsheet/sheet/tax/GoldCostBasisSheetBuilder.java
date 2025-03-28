@@ -36,6 +36,7 @@ public class GoldCostBasisSheetBuilder extends PivotTableSheetBuilder {
         pivotTableHelper().setFilterFields(filterFields);
         pivotTableHelper().showFilterButton(false);
         pivotTableHelper().insertPivotTable("gold-cost-basis", cellAddress);
+        sheetHelper().updateSheet(goldCostBasisSheet, true);
     }
 
     private static TableFilterField[] createFilterFields() {

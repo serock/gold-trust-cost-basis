@@ -9,26 +9,30 @@ import java.util.TreeMap;
 import com.sun.star.awt.FontWeight;
 import com.sun.star.sheet.XSpreadsheet;
 import com.sun.star.table.TableSortField;
-import com.sun.star.uno.Exception;
 import com.sun.star.util.MalformedNumberFormatException;
 
 import spreadsheet.SpreadsheetDocumentHelper;
 import spreadsheet.sheet.SheetBuilder;
 import text.Constants;
 
-public class GoldOuncesSheetBuilder extends SheetBuilder {
+public class CostBasisFactorsSheetBuilder extends SheetBuilder {
 
     @Override
-    public void build() throws Exception {
-        final XSpreadsheet goldOuncesSheet = SpreadsheetDocumentHelper.addSheet(document(), "gld-gold-ounces");
+    public void build() throws com.sun.star.uno.Exception {
+        final XSpreadsheet grossProceedsSheet = SpreadsheetDocumentHelper.addSheet(document(), "cost-basis-factors");
         final SortedMap<String, Object> headerProperties = createHeaderProperties();
         final List<SortedMap<String, Object>> columnPropertiesCollection = createColumnPropertiesCollection();
         sheetHelper().setHeaderProperties(headerProperties);
         sheetHelper().setColumnProperties(columnPropertiesCollection);
         sheetHelper().setSortFields(createSortFields());
-        sheetHelper().updateSheet(goldOuncesSheet, true);
-        SpreadsheetDocumentHelper.setActiveSheet(document(), goldOuncesSheet);
-        SpreadsheetDocumentHelper.freezeRowsOfActiveSheet(document(), 1);
+        sheetHelper().updateSheet(grossProceedsSheet, true);
+    }
+
+    private void addCostBasisFactorColumnProperties(final List<SortedMap<String, Object>> columnPropertiesCollection) throws MalformedNumberFormatException {
+        final int costBasisFactorFormatIndexKey = SpreadsheetDocumentHelper.addNumberFormatCode(document(), "#,##0.000000000;[RED]-#,##0.000000000");
+        final SortedMap<String, Object> columnProperties = new TreeMap<>();
+        addNumberFormatColumnProperty(columnProperties, Integer.valueOf(costBasisFactorFormatIndexKey));
+        columnPropertiesCollection.add(columnProperties);
     }
 
     private void addDateColumnProperties(final List<SortedMap<String, Object>> columnPropertiesCollection) {
@@ -42,17 +46,10 @@ public class GoldOuncesSheetBuilder extends SheetBuilder {
         columnProperties.put("NumberFormat", indexKey);
     }
 
-    private void addOuncesColumnProperties(final List<SortedMap<String, Object>> columnPropertiesCollection) throws MalformedNumberFormatException {
-        final int ouncesFormatIndexKey = SpreadsheetDocumentHelper.addNumberFormatCode(document(), "#,##0.00000000;[RED]-#,##0.00000000");
-        final SortedMap<String, Object> columnProperties = new TreeMap<>();
-        addNumberFormatColumnProperty(columnProperties, Integer.valueOf(ouncesFormatIndexKey));
-        columnPropertiesCollection.add(columnProperties);
-    }
-
     private List<SortedMap<String, Object>> createColumnPropertiesCollection() throws MalformedNumberFormatException {
         final List<SortedMap<String, Object>> columnPropertiesCollection = new ArrayList<>(4);
         addDateColumnProperties(columnPropertiesCollection);
-        addOuncesColumnProperties(columnPropertiesCollection);
+        addCostBasisFactorColumnProperties(columnPropertiesCollection);
         return columnPropertiesCollection;
     }
 
@@ -66,7 +63,7 @@ public class GoldOuncesSheetBuilder extends SheetBuilder {
     private static TableSortField[] createSortFields() {
         TableSortField[] sortFields = new TableSortField[1];
         sortFields[0] = new TableSortField();
-        sortFields[0].Field = Constants.GP_FIELD_DATE;
+        sortFields[0].Field = Constants.CBF_FIELD_DATE;
         sortFields[0].IsAscending = true;
         return sortFields;
     }

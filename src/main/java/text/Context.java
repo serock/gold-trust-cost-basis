@@ -6,14 +6,13 @@ import java.util.List;
 
 public class Context {
 
-    private final List<String[]> goldOuncesRows;
-    private final List<String[]> grossProceedsRows;
+    private final List<String[]> costBasisFactorRows;
     private final List<String[]> taxLotsRows;
 
-    private final State grossProceedsDataState = new GrossProceedsDataState();
-    private final State grossProceedsHeaderState = new GrossProceedsHeaderState();
+    private final State costBasisFactorsDataState = new CostBasisFactorsDataState();
     private final State searchState = new SearchState();
     private final State taxLotsState = new TaxLotsState();
+    private final State undeterminedTermTransactionsHeaderState = new UndeterminedTermTransactionsHeaderState();
 
     private State state;
     private String taxYear;
@@ -35,23 +34,21 @@ public class Context {
 
     private Context(final boolean isNullContext) {
         if (isNullContext) {
-            this.goldOuncesRows = null;
-            this.grossProceedsRows = null;
+            this.costBasisFactorRows = null;
             this.taxLotsRows = null;
         } else {
-            this.goldOuncesRows = new ArrayList<>();
-            this.grossProceedsRows = new ArrayList<>();
+            this.costBasisFactorRows = new ArrayList<>();
             this.taxLotsRows = new ArrayList<>();
             transitionToTaxLotsState();
         }
     }
 
-    public String[][] getGoldOuncesFormulas() {
-        return getFormulas(goldOuncesRows());
+    public String[][] getCostBasisFactorsFormulas() {
+        return getFormulas(costBasisFactorRows());
     }
 
-    public String[][] getGrossProceedsFormulas() {
-        return getFormulas(grossProceedsRows());
+    String[] getLastCostBasisFactorRow() {
+        return costBasisFactorRows().get(costBasisFactorRows().size() - 1);
     }
 
     public String[][] getTaxLotsFormulas() {
@@ -62,24 +59,16 @@ public class Context {
         return this.state;
     }
 
-    void addGoldOuncesRow(final String[] row) {
-        goldOuncesRows().add(row);
-    }
-
-    void addGrossProceedsRow(final String[] row) {
-        grossProceedsRows().add(row);
+    void addCostBasisFactorRow(final String[] row) {
+        costBasisFactorRows().add(row);
     }
 
     void addTaxLotsRow(final String[] row) {
         taxLotsRows().add(row);
     }
 
-    public boolean hasGoldOuncesHeader() {
-        return !goldOuncesRows().isEmpty();
-    }
-
-    public boolean hasGrossProceedsHeader() {
-        return !grossProceedsRows().isEmpty();
+    public boolean hasCostBasisFactorHeader() {
+        return !costBasisFactorRows().isEmpty();
     }
 
     void setTaxYear(final String year) {
@@ -89,13 +78,12 @@ public class Context {
     String taxYear() {
         return this.taxYear;
     }
-
-    void transitionToGrossProceedsDataState() {
-        setState(grossProceedsDataState());
+    void transitionToCostBasisFactorsDataState() {
+        setState(costBasisFactorsDataState());
     }
 
-    void transitionToGrossProceedsHeaderState() {
-        setState(grossProceedsHeaderState());
+    void transitionToUndeterminedTermTransactionsHeaderState() {
+        setState(undeterminedTermTransactionsHeaderState());
     }
 
     void transitionToSearchState() {
@@ -106,6 +94,14 @@ public class Context {
         setState(taxLotsState());
     }
 
+    private State costBasisFactorsDataState() {
+        return this.costBasisFactorsDataState;
+    }
+
+    private List<String[]> costBasisFactorRows() {
+        return this.costBasisFactorRows;
+    }
+
     private static String[][] getFormulas(final List<String[]> rows) {
         final String[][] formulas = new String[rows.size()][];
         int rowIndex = 0;
@@ -113,22 +109,6 @@ public class Context {
             formulas[rowIndex++] = row;
         }
         return formulas;
-    }
-
-    private List<String[]> goldOuncesRows() {
-        return this.goldOuncesRows;
-    }
-
-    private State grossProceedsDataState() {
-        return this.grossProceedsDataState;
-    }
-
-    private State grossProceedsHeaderState() {
-        return this.grossProceedsHeaderState;
-    }
-
-    private List<String[]> grossProceedsRows() {
-        return this.grossProceedsRows;
     }
 
     private State searchState() {
@@ -145,5 +125,9 @@ public class Context {
 
     private State taxLotsState() {
         return this.taxLotsState;
+    }
+
+    private State undeterminedTermTransactionsHeaderState() {
+        return this.undeterminedTermTransactionsHeaderState;
     }
 }

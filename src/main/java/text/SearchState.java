@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 class SearchState implements State {
 
-    private static final Pattern patternGrossProceedsFile = Pattern.compile("^SPDR®?\\s+GOLD TRUST (\\d{4}) GROSS PROCEEDS FILE$");
+    private static final Pattern patternUndeterminedTermTransactions = Pattern.compile("^UNDETERMINED TERM TRANSACTIONS FOR NONCOVERED TAX LOTS");
 
     @Override
     public void accept(final Context context, final String text) {
@@ -14,10 +14,9 @@ class SearchState implements State {
             return;
         }
         Matcher m;
-        m = patternGrossProceedsFile.matcher(text);
+        m = patternUndeterminedTermTransactions.matcher(text);
         if (m.find()) {
-            context.setTaxYear(m.group(1));
-            context.transitionToGrossProceedsHeaderState();
+            context.transitionToUndeterminedTermTransactionsHeaderState();
             return;
         }
     }

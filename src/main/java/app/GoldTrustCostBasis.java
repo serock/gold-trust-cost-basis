@@ -14,10 +14,9 @@ import com.sun.star.sheet.XSpreadsheetDocument;
 
 import pdf.PDFHelper;
 import spreadsheet.SpreadsheetDocumentHelper;
+import spreadsheet.sheet.tax.CostBasisFactorsSheetBuilder;
 import spreadsheet.sheet.tax.GoldCostBasisSheetBuilder;
-import spreadsheet.sheet.tax.GoldOuncesSheetBuilder;
 import spreadsheet.sheet.tax.GoldSalesSheetBuilder;
-import spreadsheet.sheet.tax.GrossProceedsSheetBuilder;
 import spreadsheet.sheet.tax.TaxLotsSheetBuilder;
 import text.Context;
 
@@ -50,9 +49,9 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
         GoldTrustCostBasis app = null;
         final String fileName = args[0];
         app = new GoldTrustCostBasis((fileName.endsWith(".ods")) ? Context.NullContext() : Context.DefaultContext());
-        if (fileName.endsWith(".ods") || fileName.endsWith(".pdf") || fileName.endsWith(".txt")) {
+        if (fileName.endsWith(".ods") || fileName.endsWith(".pdf")) {
             app.taxDataFile = new File(fileName);
-        } else if (!fileName.equals("-")) {
+        } else {
             showUsage();
             System.exit(1);
         }
@@ -71,14 +70,13 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
             if (context().equals(Context.DefaultContext())) {
                 try (Stream<String> lines = getLines()) {
                     lines.forEachOrdered(this);
-                    if (context().getGrossProceedsFormulas().length < 1) {
-                        System.err.println("Error: Could not read gross proceeds data from file");
+                    if (context().getCostBasisFactorsFormulas().length < 1) {
+                        System.err.println("Error: Could not read cost basis factors data from file");
                         System.exit(2);
                     }
                     final XSpreadsheetDocument document = docHelper.createDocument();
                     buildTaxLotsSheet(document);
-                    buildGoldOuncesSheet(document);
-                    buildGrossProceedsSheet(document);
+                    buildCostBasisFactorsSheet(document);
                     SpreadsheetDocumentHelper.setActiveSheet(document, SpreadsheetDocumentHelper.getSheet(document, "tax-lots"));
                 }
             } else {
@@ -92,10 +90,10 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
         }
     }
 
-    private void buildGoldOuncesSheet(final XSpreadsheetDocument document) throws IllegalArgumentException, com.sun.star.uno.Exception {
-        final GoldOuncesSheetBuilder builder = new GoldOuncesSheetBuilder();
+    private void buildCostBasisFactorsSheet(final XSpreadsheetDocument document) throws IllegalArgumentException, com.sun.star.uno.Exception {
+        final CostBasisFactorsSheetBuilder builder = new CostBasisFactorsSheetBuilder();
         builder.setDocument(document);
-        builder.setSheetFormulas(context().getGoldOuncesFormulas());
+        builder.setSheetFormulas(context().getCostBasisFactorsFormulas());
         builder.build();
     }
 
@@ -108,13 +106,6 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
     private static void buildGoldSalesSheet(final XSpreadsheetDocument document) throws com.sun.star.uno.Exception {
         final GoldSalesSheetBuilder builder = new GoldSalesSheetBuilder();
         builder.setDocument(document);
-        builder.build();
-    }
-
-    private void buildGrossProceedsSheet(final XSpreadsheetDocument document) throws IllegalArgumentException, com.sun.star.uno.Exception {
-        final GrossProceedsSheetBuilder builder = new GrossProceedsSheetBuilder();
-        builder.setDocument(document);
-        builder.setSheetFormulas(context().getGrossProceedsFormulas());
         builder.build();
     }
 
@@ -148,8 +139,6 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
         final String taxDataFileName = taxDataFile().getName();
         if (taxDataFileName.endsWith(".pdf")) {
             final PDFHelper pdfHelper = new PDFHelper();
-            pdfHelper.setStartPage(3);
-            pdfHelper.setEndPage(10);
             pdfHelper.extractText(taxDataFile());
             return pdfHelper.getTextLines();
         }

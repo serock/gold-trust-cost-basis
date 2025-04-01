@@ -25,7 +25,11 @@ public class GoldCostBasisSheetBuilder extends PivotTableSheetBuilder {
 
     @Override
     public void build() throws Exception {
-        final XSpreadsheet goldCostBasisSheet = SpreadsheetDocumentHelper.addSheet(document(), "gold-cost-basis");
+        final String sheetName = "gold-cost-basis";
+        if (SpreadsheetDocumentHelper.hasSheet(document(), sheetName)) {
+            return;
+        }
+        final XSpreadsheet goldCostBasisSheet = SpreadsheetDocumentHelper.addSheet(document(), sheetName);
         final CellAddress cellAddress = SheetHelper.getCellAddress(goldCostBasisSheet, 0, 0);
 
         pivotTableHelper().initialize(goldCostBasisSheet);

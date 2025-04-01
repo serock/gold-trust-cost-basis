@@ -3,6 +3,8 @@ package spreadsheet.sheet;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.stream.Stream;
 
@@ -19,6 +21,7 @@ import com.sun.star.sheet.XCellAddressable;
 import com.sun.star.sheet.XCellRangeAddressable;
 import com.sun.star.sheet.XCellRangeData;
 import com.sun.star.sheet.XCellRangeFormula;
+import com.sun.star.sheet.XSheetConditionalEntries;
 import com.sun.star.sheet.XSpreadsheet;
 import com.sun.star.sheet.XUsedAreaCursor;
 import com.sun.star.table.CellAddress;
@@ -34,11 +37,20 @@ public class SheetHelper {
 
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
+    private Map<String, List<PropertyValue[]>> conditionalFormats = Collections.emptyMap();
     private List<SortedMap<String, Object>> columnProperties = Collections.emptyList();
     private SortedMap<String, Object> headerProperties = Collections.emptySortedMap();
     private String[][] sheetFormulas;
     private String sheetName;
     private TableSortField[] sortFields;
+
+    private static void addConditionalFormat(final XSpreadsheet sheet, final String cellRangeName, final PropertyValue[] condition) throws UnknownPropertyException, WrappedTargetException, IllegalArgumentException, PropertyVetoException {
+        final XCellRange cellRange = sheet.getCellRangeByName(cellRangeName);
+        final XPropertySet propertySet = UnoRuntime.queryInterface(XPropertySet.class, cellRange);
+        final XSheetConditionalEntries conditionalEntries = UnoRuntime.queryInterface(XSheetConditionalEntries.class, propertySet.getPropertyValue("ConditionalFormat"));
+        conditionalEntries.addNew(condition);
+        propertySet.setPropertyValue("ConditionalFormat", conditionalEntries);
+    }
 
     public static CellRangeAddress getCellRangeAddressOfUsedArea(final XSpreadsheet sheet) {
         return UnoRuntime.queryInterface(XCellRangeAddressable.class, getUsedAreaCursor(sheet)).getRangeAddress();
@@ -71,6 +83,10 @@ public class SheetHelper {
         this.columnProperties = properties;
     }
 
+    public void setConditionalFormats(final Map<String, List<PropertyValue[]>> formats) {
+        this.conditionalFormats = formats;
+    }
+
     public void setSheetFormulas(final String[][] formulas) {
         this.sheetFormulas = formulas;
     }
@@ -99,6 +115,16 @@ public class SheetHelper {
         if (!headerProperties().isEmpty()) {
             // do again for NumberFormat property
             setHeaderProperties(sheet);
+        }
+        if (!conditionalFormats().isEmpty()) {
+            final Set<String> cellRangeNames = conditionalFormats().keySet();
+            List<PropertyValue[]> conditions;
+            for (String cellRangeName : cellRangeNames) {
+                conditions = conditionalFormats().get(cellRangeName);
+                for (PropertyValue[] condition : conditions) {
+                    addConditionalFormat(sheet, cellRangeName, condition);
+                }
+            }
         }
         if (optimalWidth) {
             setOptimalWidth(sheet);
@@ -178,6 +204,10 @@ public class SheetHelper {
     private void setFormulas(final XSpreadsheet sheet) throws IndexOutOfBoundsException {
         final XCellRange cellRange = sheet.getCellRangeByPosition(0, 0, sheetFormulas()[0].length - 1, sheetFormulas().length - 1);
         UnoRuntime.queryInterface(XCellRangeFormula.class, cellRange).setFormulaArray(sheetFormulas());
+    }
+
+    private Map<String, List<PropertyValue[]>> conditionalFormats() {
+        return this.conditionalFormats;
     }
 
     private List<SortedMap<String, Object>> columnProperties() {

@@ -3,14 +3,18 @@ package spreadsheet.sheet.tax;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.IntStream;
 
 import com.sun.star.awt.FontWeight;
+import com.sun.star.beans.PropertyValue;
 import com.sun.star.container.NoSuchElementException;
 import com.sun.star.lang.WrappedTargetException;
+import com.sun.star.sheet.ConditionOperator;
 import com.sun.star.sheet.XSpreadsheet;
 
 import spreadsheet.SpreadsheetDocumentHelper;
@@ -22,12 +26,16 @@ public class GoldSalesSheetBuilder extends SheetBuilder {
 
     @Override
     public void build() throws com.sun.star.uno.Exception {
-        final XSpreadsheet goldSalesSheet = SpreadsheetDocumentHelper.addSheet(document(), "gold-sales");
-        sheetHelper().setSheetFormulas(createFormulas());
-        final SortedMap<String, Object> headerProperties = createHeaderProperties();
-        final List<SortedMap<String, Object>> columnPropertiesCollection = createColumnPropertiesCollection();
-        sheetHelper().setHeaderProperties(headerProperties);
-        sheetHelper().setColumnProperties(columnPropertiesCollection);
+        final String sheetName = "gold-sales";
+        if (SpreadsheetDocumentHelper.hasSheet(document(), sheetName)) {
+            return;
+        }
+        final XSpreadsheet goldSalesSheet = SpreadsheetDocumentHelper.addSheet(document(), sheetName);
+        final String[][] sheetFormulas = createFormulas();
+        sheetHelper().setSheetFormulas(sheetFormulas);
+        sheetHelper().setConditionalFormats(createConditionalFormats(sheetFormulas));
+        sheetHelper().setHeaderProperties(createHeaderProperties());
+        sheetHelper().setColumnProperties(createColumnPropertiesCollection());
         sheetHelper().updateSheet(goldSalesSheet, true);
         SpreadsheetDocumentHelper.setActiveSheet(document(), goldSalesSheet);
         SpreadsheetDocumentHelper.freezeRowsOfActiveSheet(document(), 1);
@@ -65,6 +73,64 @@ public class GoldSalesSheetBuilder extends SheetBuilder {
     private Object[][] costBasisFactorData() throws WrappedTargetException, NoSuchElementException {
         final XSpreadsheet costBasisFactorsSheet = SpreadsheetDocumentHelper.getSheet(document(), "cost-basis-factors");
         return SheetHelper.getData(costBasisFactorsSheet);
+    }
+
+    private static PropertyValue[] createBadCondition() {
+        final List<PropertyValue> badCondition = new ArrayList<>(3);
+        PropertyValue condition;
+        condition = new PropertyValue();
+        condition.Name = "Operator";
+        condition.Value = ConditionOperator.EQUAL;
+        badCondition.add(condition);
+        condition = new PropertyValue();
+        condition.Name = "Formula1";
+        condition.Value = "";
+        badCondition.add(condition);
+        condition = new PropertyValue();
+        condition.Name = "StyleName";
+        condition.Value = "Bad";
+        badCondition.add(condition);
+        return badCondition.toArray(new PropertyValue[0]);
+    }
+
+    private static Map<String, List<PropertyValue[]>> createConditionalFormats(final String[][] formulas) {
+        final Map<String, List<PropertyValue[]>> formats = new HashMap<>();
+        final List<PropertyValue[]> conditions = createConditions();
+        int i = 1;
+        String cellRangeName;
+        for (String[] row : formulas) {
+            if ("".equals(row[Constants.GS_FIELD_ADJUSTED_COST_BASIS])) {
+                cellRangeName = "D" + Integer.toString(i);
+                formats.put(cellRangeName, conditions);
+            }
+            i++;
+        }
+        return formats;
+    }
+
+    private static List<PropertyValue[]> createConditions() {
+        final List<PropertyValue[]> conditions = new ArrayList<>(2);
+        conditions.add(createDefaultCondition());
+        conditions.add(createBadCondition());
+        return conditions;
+    }
+
+    private static PropertyValue[] createDefaultCondition() {
+        final List<PropertyValue> defaultCondition = new ArrayList<>(3);
+        PropertyValue condition;
+        condition = new PropertyValue();
+        condition.Name = "Operator";
+        condition.Value = ConditionOperator.NOT_EQUAL;
+        defaultCondition.add(condition);
+        condition = new PropertyValue();
+        condition.Name = "Formula1";
+        condition.Value = "";
+        defaultCondition.add(condition);
+        condition = new PropertyValue();
+        condition.Name = "StyleName";
+        condition.Value = "Default";
+        defaultCondition.add(condition);
+        return defaultCondition.toArray(new PropertyValue[0]);
     }
 
     private SortedMap<String, Object> createHeaderProperties() {

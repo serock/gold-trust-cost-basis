@@ -24,7 +24,7 @@ Before attempting to run the app, install the following software:
 Builds of the app are available for Linux, MacOS, and Windows.
 
 1. From the [Releases](/../../releases) page, download the `.tar.gz` or `.zip` distributable archive and the `.sha256` file for your operating system.
-2. Verify the integrity of the downloaded archive (e.g., on Linux, run `sha256sum -c gold-trust-cost-basis-2024.0.1-linux.tar.gz.sha256` from a terminal).
+2. Verify the integrity of the downloaded archive (e.g., on Linux, run `sha256sum -c gold-trust-cost-basis-2024.0.2-linux.tar.gz.sha256` from a terminal).
 3. Extract the the files from the `.tar.gz` or `.zip` archive, keeping the directory structure that is in the archive.
 
 ### Option 2: Build the App
@@ -34,7 +34,7 @@ See [How to Build the App](/../../wiki/How-to-Build-the-App) in the Wiki.
 Test the app by running the app without any arguments from a terminal. For example,
 
 ```Shell
-java -jar gold-trust-cost-basis-2024.0.1.jar
+java -jar gold-trust-cost-basis-2024.0.2.jar
 ```
 
 If the app was packaged properly for the system, the app displays the following message:
@@ -61,7 +61,7 @@ When a consolidated 1099 PDF is passed to the app, the app will launch LibreOffi
 
 ```Shell
 cd ~/Documents
-java -jar ~/gold-trust-cost-basis-2024.0.1/gold-trust-cost-basis-2024.0.1.jar \
+java -jar ~/gold-trust-cost-basis-2024.0.2/gold-trust-cost-basis-2024.0.2.jar \
   2024-form-1099-consolidated.pdf
 ```
 
@@ -69,7 +69,7 @@ java -jar ~/gold-trust-cost-basis-2024.0.1/gold-trust-cost-basis-2024.0.1.jar \
 
 ```Batchfile
 cd %USERPROFILE%\Documents
-java -jar %USERPROFILE%\gold-trust-cost-basis-2024.0.1\gold-trust-cost-basis-2024.0.1.jar ^
+java -jar %USERPROFILE%\gold-trust-cost-basis-2024.0.2\gold-trust-cost-basis-2024.0.2.jar ^
   2024-form-1099-consolidated.pdf
 ```
 
@@ -79,7 +79,7 @@ When a LibreOffice Calc spreadsheet with tax lot info is passed to the app, the 
 
 ```Shell
 cd ~/Documents
-java -jar ~/gold-trust-cost-basis-2024.0.1/gold-trust-cost-basis-2024.0.1.jar \
+java -jar ~/gold-trust-cost-basis-2024.0.2/gold-trust-cost-basis-2024.0.2.jar \
   2024-spdr-gold-trust.ods
 ```
 
@@ -87,7 +87,7 @@ java -jar ~/gold-trust-cost-basis-2024.0.1/gold-trust-cost-basis-2024.0.1.jar \
 
 ```Batchfile
 cd %USERPROFILE%\Documents
-java -jar %USERPROFILE%\gold-trust-cost-basis-2024.0.1\gold-trust-cost-basis-2024.0.1.jar ^
+java -jar %USERPROFILE%\gold-trust-cost-basis-2024.0.2\gold-trust-cost-basis-2024.0.2.jar ^
   2024-spdr-gold-trust.ods
 ```
 

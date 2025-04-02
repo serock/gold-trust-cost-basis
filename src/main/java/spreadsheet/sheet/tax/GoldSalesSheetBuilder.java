@@ -96,15 +96,11 @@ public class GoldSalesSheetBuilder extends SheetBuilder {
     private static Map<String, List<PropertyValue[]>> createConditionalFormats(final String[][] formulas) {
         final Map<String, List<PropertyValue[]>> formats = new HashMap<>();
         final List<PropertyValue[]> conditions = createConditions();
-        int i = 1;
-        String cellRangeName;
-        for (String[] row : formulas) {
-            if ("".equals(row[Constants.GS_FIELD_ADJUSTED_COST_BASIS])) {
-                cellRangeName = "D" + Integer.toString(i);
-                formats.put(cellRangeName, conditions);
-            }
-            i++;
-        }
+        IntStream.range(1, formulas.length)
+                .filter(i -> ("".equals(formulas[i][Constants.GS_FIELD_ADJUSTED_COST_BASIS])))
+                .forEachOrdered(j -> {
+                    formats.put("D" + Integer.toString(j + 1), conditions);
+                });
         return formats;
     }
 
@@ -181,18 +177,18 @@ public class GoldSalesSheetBuilder extends SheetBuilder {
                                 "=$'tax-lots'.F" + Integer.toString(i + 1)
                                 });
             }
-            final int[] factorIndices = IntStream.range(1, costBasisFactorData.length)
-                .filter(j -> ((Double) costBasisFactorData[j][Constants.CBF_FIELD_DATE]).compareTo(dateAcquiredObject) > 0 && ((Double) costBasisFactorData[j][Constants.CBF_FIELD_DATE]).compareTo(dateSoldObject) < 0)
-                .toArray();
-            for (int factorIndex : factorIndices) {
-                rowsCollection.add(
-                        new String[] {
-                                "=$'tax-lots'.A" + Integer.toString(i + 1),
-                                "=$'cost-basis-factors'.A" + Integer.toString(factorIndex + 1),
-                                "=$'cost-basis-factors'.B" + Integer.toString(factorIndex + 1) + "*D" + Integer.toString(rowsCollection.size()),
-                                "=$D" + Integer.toString(rowsCollection.size()) + "-C" + Integer.toString(rowsCollection.size() + 1)
+            final int fi = i;
+            IntStream.range(1, costBasisFactorData.length)
+                    .filter(j -> ((Double) costBasisFactorData[j][Constants.CBF_FIELD_DATE]).compareTo(dateAcquiredObject) > 0 && ((Double) costBasisFactorData[j][Constants.CBF_FIELD_DATE]).compareTo(dateSoldObject) < 0)
+                    .forEachOrdered(k -> {
+                        rowsCollection.add(
+                                new String[] {
+                                        "=$'tax-lots'.A" + Integer.toString(fi + 1),
+                                        "=$'cost-basis-factors'.A" + Integer.toString(k + 1),
+                                        "=$'cost-basis-factors'.B" + Integer.toString(k + 1) + "*D" + Integer.toString(rowsCollection.size()),
+                                        "=$D" + Integer.toString(rowsCollection.size()) + "-C" + Integer.toString(rowsCollection.size() + 1)
                                 });
-            }
+                    });
         }
         return rowsCollection.toArray(new String[0][0]);
     }

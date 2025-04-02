@@ -81,6 +81,13 @@ public class SpreadsheetDocumentHelper {
         return dateValue;
     }
 
+    public static void deleteSheets(final XSpreadsheetDocument document, final String[] sheetNames) throws NoSuchElementException, WrappedTargetException {
+        final XSpreadsheets sheets = document.getSheets();
+        for (String sheetName : sheetNames) {
+            sheets.removeByName(sheetName);
+        }
+    }
+
     public static Integer getCurrencyNumberFormat(final XSpreadsheetDocument document) {
         return Integer.valueOf(getNumberFormatTypes(document).getFormatIndex(NumberFormatIndex.CURRENCY_1000DEC2_RED, locale));
     }
@@ -104,6 +111,10 @@ public class SpreadsheetDocumentHelper {
 
     public static XSpreadsheet getSheet(final XSpreadsheetDocument document, final String sheetName) throws WrappedTargetException, NoSuchElementException {
         return UnoRuntime.queryInterface(XSpreadsheet.class, document.getSheets().getByName(sheetName));
+    }
+
+    public static String[] getSheetNames(final XSpreadsheetDocument document) {
+        return document.getSheets().getElementNames();
     }
 
     public static boolean hasSheet(final XSpreadsheetDocument document, final String sheetName) {

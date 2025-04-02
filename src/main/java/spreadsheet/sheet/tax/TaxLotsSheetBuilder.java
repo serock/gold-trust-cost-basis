@@ -17,10 +17,9 @@ public class TaxLotsSheetBuilder extends SheetBuilder {
 
     @Override
     public void build() throws com.sun.star.uno.Exception {
-        final XSpreadsheet taxLotsSheet = SpreadsheetDocumentHelper.getSheet(document(), 0);
+        final XSpreadsheet taxLotsSheet = SpreadsheetDocumentHelper.addSheet(document(), "tax-lots");
         final SortedMap<String, Object> headerProperties = createHeaderProperties();
         final List<SortedMap<String, Object>> columnPropertiesCollection = createColumnPropertiesCollection();
-        sheetHelper().setSheetName("tax-lots");
         sheetHelper().setHeaderProperties(headerProperties);
         sheetHelper().setColumnProperties(columnPropertiesCollection);
         sheetHelper().updateSheet(taxLotsSheet, true);

@@ -75,8 +75,10 @@ public class GoldTrustCostBasis implements Consumer<String>, Runnable {
                         System.exit(2);
                     }
                     final XSpreadsheetDocument document = docHelper.createDocument();
+                    final String[] defaultSheetNames = SpreadsheetDocumentHelper.getSheetNames(document);
                     buildTaxLotsSheet(document);
                     buildCostBasisFactorsSheet(document);
+                    SpreadsheetDocumentHelper.deleteSheets(document, defaultSheetNames);
                     SpreadsheetDocumentHelper.setActiveSheet(document, SpreadsheetDocumentHelper.getSheet(document, "tax-lots"));
                 }
             } else {

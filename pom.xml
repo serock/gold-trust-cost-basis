@@ -109,7 +109,7 @@
         <dependency>
             <groupId>org.libreoffice</groupId>
             <artifactId>libreoffice</artifactId>
-            <version>24.8.4</version>
+            <version>24.8.5</version>
             <scope>system</scope>
             <systemPath>${libreoffice.jar.path}</systemPath>
         </dependency>

@@ -198,7 +198,7 @@
                 <libreoffice.jar.url>file:///usr/lib/libreoffice/program/classes/libreoffice.jar</libreoffice.jar.url>
             </properties>
         </profile>
-         <profile>
+        <profile>
             <id>for-linux</id>
             <properties>
                 <assembly.format>tar.gz</assembly.format>
@@ -207,7 +207,7 @@
                 <libreoffice.jar.url>file:///usr/lib64/libreoffice/program/classes/libreoffice.jar</libreoffice.jar.url>
             </properties>
         </profile>
-         <profile>
+        <profile>
             <id>for-macos</id>
             <properties>
                 <assembly.format>tar.gz</assembly.format>
@@ -218,7 +218,7 @@
         </profile>
         <profile>
             <id>for-windows</id>
-             <properties>
+            <properties>
                 <assembly.format>zip</assembly.format>
                 <assembly.id>windows</assembly.id>
                 <assembly.lineEnding>windows</assembly.lineEnding>

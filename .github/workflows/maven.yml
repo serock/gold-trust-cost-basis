@@ -11,7 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check out source code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
+    - name: Set up Java
+      uses: actions/setup-java@v5
+      with:
+        distribution: 'temurin'
+        java-version: '21'
     - name: Set up LibreOffice UNO runtime environment
       run: |
         sudo apt-get update

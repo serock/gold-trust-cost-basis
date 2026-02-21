@@ -68,6 +68,18 @@ public class SheetHelper {
        return UnoRuntime.queryInterface(XCellRangeData.class, getUsedAreaCursor(sheet)).getDataArray();
     }
 
+    public static void setCellRangeFormulas(final XSpreadsheet sheet, final String cellRangeName, final String[][] formulas) throws IllegalArgumentException {
+        final XCellRange cellRange = sheet.getCellRangeByName(cellRangeName);
+        UnoRuntime.queryInterface(XCellRangeFormula.class, cellRange).setFormulaArray(formulas);
+    }
+
+    public static void setCellRangeProperties(final XSpreadsheet sheet, final String cellRangeName, final SortedMap<String, Object> cellRangeProperties) throws IllegalArgumentException, PropertyVetoException, WrappedTargetException {
+        final XCellRange cellRange = sheet.getCellRangeByName(cellRangeName);
+        final String[] keys = cellRangeProperties.keySet().toArray(new String[0]);
+        final Object[] values = cellRangeProperties.values().toArray();
+        UnoRuntime.queryInterface(XMultiPropertySet.class, cellRange).setPropertyValues(keys, values);
+    }
+
     public boolean isColumnEmpty(final int column) {
         return Stream.of(sheetFormulas())
                 .skip(1)
